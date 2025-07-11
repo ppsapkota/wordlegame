@@ -130,7 +130,7 @@
     function parseCSV(text) {
       // Split by line breaks, trim, uppercase, filter 5-letter unique words
       return text
-        .split(",")
+        .split(/\r?\n/)
         .map(w => w.trim().toUpperCase())
         .filter(w => w.length === 5)
         .filter((v, i, a) => a.indexOf(v) === i);
