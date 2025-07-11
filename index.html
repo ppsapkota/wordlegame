@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Guess the Word</title>
   <style>
     body {
@@ -12,24 +12,11 @@
       color: #ffffff;
       margin: 0;
     }
-    h1 {
-      margin: 20px 0 10px 0; /* Reduced bottom margin */
-    }
-    #new-game-btn {
-      margin: 0 0 15px 0; /* Reduced vertical margin below button */
-      padding: 10px 20px;
-      font-size: 1rem;
-      cursor: pointer;
-      background-color: #538d4e;
-      color: white;
-      border: none;
-      border-radius: 4px;
-    }
     #game {
       display: grid;
       grid-template-rows: repeat(6, 1fr);
       gap: 10px;
-      margin: 0 auto 20px auto; /* Reduced top margin */
+      margin: 20px auto 10px;
       width: max-content;
     }
     .row {
@@ -63,7 +50,7 @@
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      margin: 0 auto 20px auto;
+      margin: 10px auto 30px;
     }
     .keyboard-row {
       display: flex;
@@ -94,8 +81,18 @@
     .key.absent {
       background-color: #3a3a3c;
     }
+    #new-game-btn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #538d4e;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
     #message {
-      margin: 10px auto;
+      margin: 5px auto;
       font-size: 1.5rem;
       color: #80ff80;
     }
@@ -103,18 +100,16 @@
 </head>
 <body>
   <h1>Guess the Word</h1>
-  <button id="new-game-btn" disabled>Loading words...</button>
+  <button id="new-game-btn">New Game</button>
   <div id="game"></div>
   <div id="message"></div>
   <div id="keyboard"></div>
 
   <script>
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSiOKCZAY9fw4iv7yEs9Di3EPPjPvfD1ZTyOZf_Wy8wJRays78nejDBHFYCf91dwZAID-QTwrpdoSMd/pub?gid=0&single=true&output=csv";
-
-    let wordList = [];
-    let targetWord = '';
+    let targetWord = 'CRANE';
     let currentRow = 0;
     let currentGuess = '';
+    let wordList = [];
 
     const game = document.getElementById('game');
     const keyboard = document.getElementById('keyboard');
@@ -127,26 +122,13 @@
       'ZXCVBNM'
     ];
 
-    function parseCSV(text) {
-      // Split by line breaks, trim, uppercase, filter 5-letter unique words
-      return text
-        .split(/\r?\n/)
-        .map(w => w.trim().toUpperCase())
-        .filter(w => w.length === 5)
-        .filter((v, i, a) => a.indexOf(v) === i);
-    }
-
     async function loadWords() {
       try {
-        const response = await fetch(csvUrl);
-        const text = await response.text();
-        wordList = parseCSV(text);
-        if (wordList.length === 0) {
-          messageDiv.textContent = 'Error: No valid words found in list.';
-          return;
-        }
-        newGameBtn.disabled = false;
-        newGameBtn.textContent = 'New Game';
+        const res = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSiOKCZAY9fw4iv7yEs9Di3EPPjPvfD1ZTyOZf_Wy8wJRays78nejDBHFYCf91dwZAID-QTwrpdoSMd/pub?gid=0&single=true&output=csv');
+        const text = await res.text();
+        wordList = text.split(/\r?\n/).map(w => w.trim().toUpperCase()).filter(w => w.length === 5);
+        if (wordList.length === 0) throw new Error('No valid words found.');
+        targetWord = wordList[Math.floor(Math.random() * wordList.length)];
         initGame();
       } catch (err) {
         messageDiv.textContent = 'Error loading words.';
@@ -154,16 +136,11 @@
       }
     }
 
-    function getRandomWord() {
-      return wordList[Math.floor(Math.random() * wordList.length)];
-    }
-
     function initGame() {
       game.innerHTML = '';
       messageDiv.textContent = '';
       currentRow = 0;
       currentGuess = '';
-      targetWord = getRandomWord();
 
       for (let r = 0; r < 6; r++) {
         const row = document.createElement('div');
@@ -222,6 +199,10 @@
         }
       } else if (key === 'ENTER') {
         if (currentGuess.length === 5) {
+          if (!wordList.includes(currentGuess.toUpperCase())) {
+            messageDiv.textContent = 'Word not in list!';
+            return;
+          }
           checkGuess(currentGuess.toUpperCase());
         }
       } else if (/^[A-Z]$/.test(key) && currentGuess.length < 5) {
@@ -261,15 +242,12 @@
 
       if (guess === targetWord) {
         messageDiv.textContent = '🎉 Congratulations! You guessed the word!';
-        currentRow = 6; // stop input
+        currentRow = 6;
         return;
       }
 
       currentRow++;
       currentGuess = '';
-      if (currentRow === 6) {
-        messageDiv.textContent = `Game Over! The word was ${targetWord}`;
-      }
     }
 
     function updateKeyboard(letter, status) {
@@ -289,14 +267,18 @@
     }
 
     document.addEventListener('keydown', e => {
-      if (currentRow >= 6) return;
       if (e.key === 'Enter') handleKey('ENTER');
       else if (e.key === 'Backspace') handleKey('«');
       else handleKey(e.key.toUpperCase());
     });
 
     newGameBtn.addEventListener('click', () => {
-      initGame();
+      if (wordList.length > 0) {
+        targetWord = wordList[Math.floor(Math.random() * wordList.length)];
+        initGame();
+      } else {
+        loadWords();
+      }
     });
 
     loadWords();
