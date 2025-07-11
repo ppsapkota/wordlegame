@@ -197,17 +197,20 @@
           currentGuess = currentGuess.slice(0, -1);
           cells[currentGuess.length].textContent = '';
         }
+        messageDiv.textContent = '';
       } else if (key === 'ENTER') {
         if (currentGuess.length === 5) {
           if (!wordList.includes(currentGuess.toUpperCase())) {
             messageDiv.textContent = 'Word not in list!';
             return;
           }
+          messageDiv.textContent = '';
           checkGuess(currentGuess.toUpperCase());
         }
       } else if (/^[A-Z]$/.test(key) && currentGuess.length < 5) {
         cells[currentGuess.length].textContent = key;
         currentGuess += key;
+        messageDiv.textContent = '';
       }
     }
 
@@ -248,6 +251,10 @@
 
       currentRow++;
       currentGuess = '';
+
+      if (currentRow === 6) {
+        messageDiv.textContent = `Good attempt! The word was ${targetWord}.`;
+      }
     }
 
     function updateKeyboard(letter, status) {
