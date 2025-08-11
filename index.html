@@ -70,21 +70,21 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     margin: 5px auto 15px;
   }
 
   .keyboard-row {
     display: flex;
-    gap: 3px;
+    gap: 4px;
     justify-content: center;
   }
 
   .key {
-    height: 40px;
-    min-width: 28px;
-    padding: 0 6px;
-    font-size: 0.9rem;
+    height: 46px; /* 15% bigger than original 40px */
+    min-width: 32px; /* 15% bigger than original 28px */
+    padding: 0 7px;
+    font-size: 1.035rem; /* 15% bigger than original 0.9rem */
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -94,7 +94,7 @@
     transition: background-color 0.2s, transform 0.1s;
   }
   .key:active { transform: scale(0.95); }
-  .key.wide { min-width: 45px; }
+  .key.wide { min-width: 52px; } /* 15% bigger than 45px */
   .key.correct { background-color: #00cc66; }
   .key.present { background-color: #ffaa00; }
   .key.absent { background-color: #3a3a3c; }
@@ -104,20 +104,6 @@
     font-size: 1.1rem;
     color: #00ffcc;
     min-height: 20px;
-  }
-
-  /* Mobile adjustments for iPhone 14 size */
-  @media (max-width: 430px) {
-    .cell {
-      width: 42px;
-      height: 42px;
-      font-size: 1.2rem;
-    }
-    .key {
-      height: 36px;
-      min-width: 26px;
-      font-size: 0.85rem;
-    }
   }
 </style>
 </head>
@@ -306,7 +292,6 @@
       loadWords();
     }
   });
-
   loadWords();
 </script>
 </body>
